@@ -1,37 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Live Code Previewer</title>
-  <style>
-    html, body { margin: 0; padding: 0; height: 100%; }
-    iframe { width: 100%; height: 100%; border: none; }
-  </style>
-</head>
-<body>
+  <title>Live Preview</title>
   <script>
     function getParam(name) {
       const url = new URL(window.location.href);
-      return decodeURIComponent(url.searchParams.get(name) || '');
+      return url.searchParams.get(name) || '';
     }
 
-    const html = getParam('html');
-    const css = `<style>${getParam('css')}</style>`;
-    const js = `<script>${getParam('js')}<\/script>`;
-
-    const full = `
-      <html>
-        <head>${css}</head>
-        <body>${html}${js}</body>
-      </html>
-    `;
+    const html = decodeURIComponent(getParam('html'));
+    const cssFile = getParam('css');
+    const jsFile = getParam('js');
+    const cssCode = decodeURIComponent(getParam('cssCode') || '');
+    const jsCode = decodeURIComponent(getParam('jsCode') || '');
 
     const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '90vh';
     document.body.appendChild(iframe);
-    const doc = iframe.contentWindow.document;
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
-    doc.write(full);
+    doc.write(`
+      <html>
+        <head>
+          ${cssFile ? `<link rel="stylesheet" href="css/${cssFile}">` : ''}
+          <style>${cssCode}</style>
+        </head>
+        <body>
+          ${html}
+          <script src="js/logger.js"><\/script>
+          ${jsFile ? `<script src="js/${jsFile}"><\/script>` : ''}
+          <script>${jsCode}<\/script>
+        </body>
+      </html>
+    `);
     doc.close();
   </script>
+</head>
+<body>
 </body>
 </html>
